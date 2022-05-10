@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block page %}
+
+<div>
+    {% if 'error' in message %}
+    <div class="alert alert-danger" role="alert">
+      {{ message['error'] }}
+    </div>
+    {% endif %}
+
+    <p><h1>Select clusters to {{ data['mode'] }}</h1></p>
+    <form action="/annotation" method="get" class="form-search row g3">
+        <div class="input-group mb-3">
+            <input type="search" class="form-control" placeholder="Keywords for search or empty for random" id="query" name="query" value="" autofocus aria-label="" aria-describedby="search-btn">
+            <span class="input-group-text" id="search-btn">
+                <button type="submit" class="btn btn-sm" id="search" name="search" value="Search">
+                    <i class="bi bi-search"></i>
+                </button>
+            </span>
+        </div>
+    </form>
+
+    {% if 'clusters' in data %}
+    <br>
+    <div>
+        <table id="list-table" class="table table-hover"
+               data-toggle="table"
+               data-search="false"
+               data-sortable="true"
+               data-sort-reset="true"
+               data-row-attributes="row_attributes"
+               data-show-columns="false">
+            <thead>
+            <tr>
+                <th scope="col">Cluster</th>
+                <th scope="col" data-sortable="true">Name</th>
+                <th scope="col" data-sortable="true" data-field="size">Size</th>
+                {% if request.args.get('query') %}
+                <th scope="col" data-sortable="true" data-field="hits">Hits</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for cid, prop in data['clusters'].items() %}
+                <tr>
+                    <td scope="row">{{ cid }}</td>
+                    <td scope="row">{{ prop['name'] }}</td>
+                    <td scope="row">{{ prop['size'] }}</td>
+                    {% if request.args.get('query') %}
+                    <td scope="row">{{ prop['hits'] }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+(function() {
+    var query = new URLSearchParams(window.location.search).get("query");
+    if (query)
+        document.getElementById("query").value = query;
+
+
+    document.getElementById("query").addEventListener("keyup", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("search").click();
+        }
+    });
+})();
+
+function row_attributes(row, index) {
+    // row is the object, index is the row number
+    return {
+        'data-cid': row[0],
+        // 'data-bs-toggle': 'modal',
+        // 'data-bs-target': '#popup'
+    }
+}
+</script>
+{% endblock %}
+
+{% block bottom %}
+{% include "split-popup.html" %}
+{% endblock %}

@@ -1,0 +1,46 @@
+<div>
+    {% if 'error' in message %}
+    <div class="alert alert-danger" role="alert">
+      {{ message['error'] }}
+    </div>
+    {% endif %}
+
+    <p><h1>Split Cluster <mark>{{ data['cluster_id'] }}</mark></h1></p>
+    <p><em>{{ data['cluster_name'] }}</em></p>
+    <form action="/split/{{ data['cluster_id'] }}" method="post">
+    <p class="pt-1">
+        <div class="row g-5">
+          <div class="col-md-12 overflow-auto">
+              <table class="table table-hover" id="annotation-table"
+                     data-toggle="table"
+                     data-search="true"
+                     data-sortable="true"
+                     data-show-columns="false"
+                     data-sort-reset="true">
+              <thead>
+                <tr>
+                    <th scope="col">Cluster</th>
+                    {% for col in data['data_columns'] %}
+                    <th scope="col" data-sortable="true">{{ col }}</th>
+                    {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+              {% for rid, row in data['records'].items() %}
+                  <tr>
+                      <td><input id="rid-{{ rid }}" name="rid-{{ rid }}" type="text" size=3 value="{{ row['new_cid'] }}" style="text-align:right" /></td>
+                      {% for k, v in row.items() %}
+                          {% if k != 'new_cid' %}
+                          <td scope="row">{{ v }}</td>
+                          {% endif %}
+                      {% endfor %}
+                  </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+    </p>
+    </form>
+
+</div>

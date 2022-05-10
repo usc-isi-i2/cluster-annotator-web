@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ${POSTGRES_HOST_DATA_VOLUME}:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 127.0.0.1:${ADMINER_HOST_PORT}:8080

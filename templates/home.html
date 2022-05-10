@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block page %}
+
+<div>
+    {% if 'error' in message %}
+    <div class="alert alert-danger" role="alert">
+        {{ message['error'] }}
+    </div>
+    {% endif %}
+
+    <p><h1>Overview</h1></p>
+    <p class="pt-3">
+    {% if data['mode'] != 'idle' %}
+        <p><b>Mode:</b> <code>{{ data['mode'].capitalize() }}</code></p>
+
+        <p class="pt-3"><b># of clusters:</b> {{ data['stat']['num_of_clusters'] }}</p>
+        <p><b># of annotated clusters:</b> {{ data['stat']['num_of_annotated_clusters'] }}</p>
+        <p><b># of annotated clusters by me:</b> {{ data['stat']['num_of_annotated_clusters_by_user'] }}</p>
+        <p><b># of remaining clusters:</b> {{ data['stat']['num_of_remaining_clusters'] }}</p>
+
+        <div class="pt-3">
+        <a href="/annotation"><button type="button" class="btn btn-success">Start Annotating</button></a>
+        <a href="/progress"><button type="button" class="btn btn-secondary">Review Progress</button></a>
+        </div>
+    {%  else %}
+        Please wait until the admin initialize the task.
+    {% endif %}
+    </p>
+
+</div>
+{% endblock %}

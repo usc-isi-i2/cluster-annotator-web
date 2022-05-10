@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cluster Annotator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link href="/static/login.css" rel="stylesheet">
+</head>
+<body class="text-center">
+
+<main class="form-signin">
+    <div class="mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-journal-album" viewBox="0 0 16 16">
+            <path d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/>
+            <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+            <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+        </svg>
+        <span class="fs-4 ms-2">Cluster Annotator</span>
+    </div>
+
+    <form action="/user/login" method="post">
+        {% if 'error' in message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message['error'] }}
+            </div>
+        {% endif %}
+
+        <div class="form-floating">
+            <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="name@example.com">
+            <label for="floatingEmail">Email address</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password">
+            <label for="floatingPassword">Password</label>
+        </div>
+
+        <div class="input-group mb-2">
+            <span class="input-group-text" id="captcha"><img src="data:image;base64,{{ data['captcha'] }}"></span>
+            <input type="text" class="form-control" name="captcha" placeholder="CAPTCHA" aria-label="captcha" aria-describedby="captcha">
+        </div>
+
+        <button class="w-100 btn btn-lg btn-success" type="submit">Sign in</button>
+    </form>
+
+    <p class="mt-5 mb-3 text-muted">&copy; 2022 &middot; USC/ISI</p>
+</main>
+
+
+
+</body>
+</html>

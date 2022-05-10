@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block page %}
+
+<div>
+    {% if 'error' in message %}
+        <div class="alert alert-danger" role="alert">
+            {{ message['error'] }}
+        </div>
+    {% endif %}
+
+    {% if 'records' in data %}
+    <p>
+        <h1 class="d-inline">{{ data['mode'].capitalize() }} Progress</h1>
+        <span class="d-inline ms-2">(records <a href="/progress?view=clusters" class="link-success"><i class="bi bi-arrow-left-right"></i></a>)</span>
+    </p>
+    <div class="row g-5 pt-3">
+        <div class="col-md-12 overflow-auto">
+            <table id="list-table" class="table table-hover"
+                   data-toggle="table"
+                   data-show-columns="false"
+                   data-sortable="true"
+                   data-sort-reset="true"
+                   data-url="/progress/data?view=records"
+                   data-side-pagination="server"
+                   data-pagination="true"
+                   data-server-sort="false"
+                   data-response-handler="record_response_handler">
+                <thead>
+                <tr>
+                    {% for col in data['data_columns'] %}
+                        <th scope="col" data-sortable="true" data-field="{{ col }}">{{ col.capitalize() }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    </p>
+    {% else %}
+    <p>
+        <h1 class="d-inline">{{ data['mode'].capitalize() }} Progress</h1>
+        <span class="d-inline ms-2">(clusters <a href="/progress?view=records" class="link-success"><i class="bi bi-arrow-left-right"></i></a>)</span>
+    </p>
+    <div class="row g-5 pt-3">
+        <div class="col-md-12 overflow-auto">
+            <table id="list-table" class="table table-hover"
+                   data-toggle="table"
+                   data-show-columns="false"
+                   data-sortable="true"
+                   data-sort-reset="true"
+                   data-url="/progress/data?view=clusters"
+                   data-side-pagination="server"
+                   data-pagination="true"
+                   data-server-sort="false"
+                   data-response-handler="cluster_response_handler">
+                <!--
+                   data-query-params="query_params"
+                   data-search="true"
+                   data-search-on-enter-key="true"-->
+                <thead>
+                <tr>
+                    <th scope="col" data-field="id">Cluster</th>
+                    <th scope="col" data-sortable="true" data-field="name">Name</th>
+                    <th scope="col" data-sortable="true" data-field="size">Size</th>
+                    <th scope="col" data-sortable="true" data-field="status">Status</th>
+                    <th scope="col" data-sortable="true" data-field="by">By</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    </p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+var table = $('#table');
+var LS_KEY = 'progress-table-only-show-unannotated';
+var ICON_SHOW = 'bi-eye-fill';
+var ICON_HIDE = 'bi-eye-slash-fill';
+
+$(function() {
+    // table.bootstrapTable();
+    // $table.removeClass('table-bordered');
+})
+
+function query_params(params) {
+    // console.log(params);
+    return params;
+}
+
+function cluster_response_handler(res) {
+    for (let i=0; i<res['rows'].length; i++) {
+        // console.log(res);
+        // add row-attribute dynamically
+        res['rows'][i]['_data'] = {};
+        res['rows'][i]['_data']['cid'] = res['rows'][i]['id'];
+    }
+    return res;
+}
+
+function record_response_handler(res) {
+    for (let i=0; i<res['rows'].length; i++) {
+        // console.log(res);
+        // add row-attribute dynamically
+        res['rows'][i]['_data'] = {};
+        res['rows'][i]['_data']['cid'] = res['rows'][i]['cid'];
+    }
+    return res;
+}
+
+</script>
+{% endblock %}
+
+{% block bottom %}
+{% include "split-popup.html" %}
+{% endblock %}

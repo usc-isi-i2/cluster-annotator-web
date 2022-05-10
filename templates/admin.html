@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block page %}
+
+    <div>
+        {% if 'error' in message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message['error'] }}
+            </div>
+        {% endif %}
+
+        <p><h1>Admin Panel</h1></p>
+
+        <p class="pt-3"><h3>Mode</h3></p>
+        <p>Current mode is <code>{{  data['mode'].capitalize() }}</code>.</p>
+        {% if data['mode'] == 'idle' %}
+        <p>Please specify a mode to start with.</p>
+        <p>
+        <form method="post" action="/admin/mode">
+            <div class="d-grid gap-2 col-2">
+                <input type="submit" class="btn btn-success" name="mode" value="Split" />
+                <input type="submit" class="btn btn-outline-success" name="mode" value="Merge" />
+            </div>
+        </form>
+        </p>
+        {% else %}
+        <p>
+            <div class="d-grid gap-2 col-2">
+                <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#confirm-generate">Generate clusters</button>
+            </div>
+        </p>
+        <div class="modal fade" id="confirm-generate" tabindex="-1" aria-labelledby="confirm-generate-label" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="post" action="/admin/generate">
+                    <div class="modal-content">
+                        <!--<div class="modal-header">
+                            <h5 class="modal-title" id="confirm-generate-label">Confirmation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>-->
+                        <div class="modal-body">
+                            <p>Are you sure to apply current annotations for new clusters generation?
+                            <p>All un-annotated clusters will be kept as-is.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                            <input type="submit" class="btn btn-success" name="submit" value="Yes"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <p class="pt-3"><h3>Users</h3></p>
+        <table class="table table-hover"
+            data-toggle="table"
+            data-sortable="true"
+            data-show-columns="false"
+            data-sort-reset="true">
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Email</th>
+                <th scope="col">Admin</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in data['users'] %}
+                <tr>
+                    <td scope="row">{{ row['id'] }}</td>
+                    <td scope="row">{{ row['email'] }}</td>
+                    <td scope="row">{{ row['is_admin'] or '' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+</script>
+{% endblock %}

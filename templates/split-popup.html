@@ -1,0 +1,111 @@
+<div class="text-center" id="spinner" style="display: none;">
+    <div class="spinner-border" role="status"></div>
+</div>
+<div class="modal fade" id="popup" tabindex="-1" aria-labelledby="popup-label" aria-hidden="true">
+    <div class="modal-dialog annotation-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" name="cancel">Cancel</button>
+                <input type="button" class="btn btn-outline-success" name="save" value="Save" />
+                <input type="button" class="btn btn-success" name="save-next" value="Save and Do Next" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+function load_modal(cid){
+    // $('#spinner').show();
+    $('.modal-body').html('');
+    $('.modal-content').hide();
+
+    var cid_element = $('tr[data-cid=' + cid + ']');  // tr element
+    var next_cid = null;
+    if (cid_element.next().length) {
+        next_cid = cid_element.next().attr('data-cid');
+    }
+    var save_btn = $('input[name=save]');
+    var next_btn = $('input[name=save-next]');
+    //console.log(cid, next_cid);
+
+    $.ajax({
+        url: '/annotation/{{ data['mode'] }}/' + cid,
+        type: 'get',
+        data: null,
+        success: function(response){
+            $('.modal-body').html(response);
+            save_btn.attr('data-cid', cid);
+            if (next_cid == null) {
+                next_btn.hide();
+            } else {
+                next_btn.show();
+                next_btn.attr('data-next-cid', next_cid);
+            }
+            // $('#spinner').hide();
+            $('.modal-content').show();
+            $('#popup').modal('show');
+        }
+    });
+}
+
+function save() {
+    var cid = $('input[name=save]').attr('data-cid');
+    var annotations = $('#annotation-table input');  // #annotation-table is the inner table for annotation
+    var form_data = new FormData();
+    for (let i = 0; i < annotations.length; i++) {
+        form_data.append(annotations[i].id, annotations[i].value);
+    }
+
+    $.ajax({
+        url: '/annotation/{{ data['mode'] }}/' + cid,
+        type: 'post',
+        data: form_data,
+        processData: false,
+        contentType: false,
+        success: function(response){
+            $('#popup').modal('hide');
+        },
+        error: function(response) {
+            $('.modal-body').html(response.responseText);
+        }
+    });
+}
+
+$(document).ready(function(){
+    // #list-table is the outer table that lists all clusters to be annotated
+    $('#list-table').on('click-row.bs.table', function (row, $element, field) {
+        var cid = field.attr('data-cid');
+        load_modal(cid);
+    });
+
+    $('input[name=save-next]').on('click', function() {
+        save();
+        var cid = $(this).attr('data-next-cid');
+
+        // https://github.com/twbs/bootstrap/issues/3902
+        // https://getbootstrap.com/docs/4.0/components/modal/#events
+        // only on this event for one time
+        // make sure to show modal after the previous one is hidden
+        $('#popup').one('hidden.bs.modal', function (e) {
+            load_modal(cid);
+        })
+    });
+
+    $('input[name=save]').on('click', function() {
+        save();
+    });
+
+    /*$('.modal').on('keydown', function(e) {
+        if (e.altKey && ( e.which === 83 )) {  // alt+s
+            save();
+        }
+    })*/
+
+
+});
+
+</script>
