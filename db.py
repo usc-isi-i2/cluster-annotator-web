@@ -252,5 +252,9 @@ class Meta(db.Model):
     @classmethod
     def set(cls, key, value):
         meta = cls.query.get(key)
-        meta.value = value
+        if not meta:
+            meta = Meta(key=key, value=value)
+            db.session.add(meta)
+        else:
+            meta.value = value
         db.session.commit()

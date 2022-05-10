@@ -34,9 +34,7 @@ if __name__ == '__main__':
     if args.init:
         with app.app_context():
             Meta.__table__.create(db.engine, checkfirst=True)
-            meta = Meta(key='mode', value='idle')
-            db.session.add(meta)
-            db.session.commit()
+            Meta.set('mode', 'idle')
             sys.exit()
 
     if args.create_user:
