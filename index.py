@@ -166,14 +166,19 @@ def annotation():
             query_text = args['query'].strip()
             # query_text = query_text.replace(' ', '+')
             if not query_text:
-                results = Cluster.query.filter(Cluster.annotation == None).order_by(func.random()).limit(10).all()
+                results = db.session.query(Cluster) \
+                    .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
+                    .filter(Cluster.annotation == None) \
+                    .having(func.count(Cluster.relations) > 1) \
+                    .group_by(Cluster.id).order_by(func.random()).limit(10).all()
                 clusters = {c.id: {'name': c.records[0], 'size': len(c.relations)} for c in results}
             else:
-                results = db.session.query(Cluster, func.count(Record.id))\
-                    .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid)\
+                results = db.session.query(Cluster, func.count(Record.id)) \
+                    .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
                     .join(Record, RecordClusterRelation.rid == Record.id) \
-                    .filter(Record.__ts_vec__.match(query_text))\
-                    .filter(Cluster.annotation == None)\
+                    .filter(Record.__ts_vec__.match(query_text)) \
+                    .filter(Cluster.annotation == None) \
+                    .having(func.count(Cluster.relations) > 1) \
                     .group_by(Cluster.id).limit(10).all()  # .all().distinct(Cluster.id)
                 clusters = {c.id: {'name': c.records[0], 'size': len(c.relations), 'hits': cnt} for c, cnt in results}
             data['clusters'] = clusters
