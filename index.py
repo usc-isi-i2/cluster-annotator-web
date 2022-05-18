@@ -166,7 +166,7 @@ def annotation():
             query_text = args['query'].strip()
             # query_text = query_text.replace(' ', '+')
             if not query_text:
-                results = Cluster.query.filter(Cluster.annotation == None).limit(10).all()
+                results = Cluster.query.filter(Cluster.annotation == None).order_by(func.random()).limit(10).all()
                 clusters = {c.id: {'name': c.records[0], 'size': len(c.relations)} for c in results}
             else:
                 results = db.session.query(Cluster, func.count(Record.id))\
