@@ -7,7 +7,7 @@
 
     <p><h1>Split Cluster <mark>{{ data['cluster_id'] }}</mark></h1></p>
     <p><em>{{ data['cluster_name'] }}</em></p>
-    <form action="/split/{{ data['cluster_id'] }}" method="post">
+    <form action="{{ BASE_URL }}/annotation/split/{{ data['cluster_id'] }}" method="post">
     <p class="pt-1">
         <div class="g-5">
           <div class="col-md-12 overflow-auto">

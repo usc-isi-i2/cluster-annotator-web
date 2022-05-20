@@ -3,23 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Cluster Annotator</title>
+    <title>{{ APP_NAME }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.css">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ BASE_URL }}/static/style.css">
 </head>
 
 <body>
 <div id="main" class="col-8 mx-auto p-3 py-md-5">
   <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
-    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+    <a href="{{ BASE_URL }}/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-journal-album" viewBox="0 0 16 16">
           <path d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/>
           <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
           <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
         </svg>
-      <span class="fs-4 ms-2">Cluster Annotator</span>
+      <span class="fs-4 ms-2">{{ APP_NAME }}</span>
     </a>
 
   <div class="dropdown">
@@ -34,7 +34,7 @@
               <div class="d-block p-2 text-center">
                   <p>{{ data['user']['email'] }}</p>
                   {% if data['user']['is_admin'] %}
-                  <p><a class="btn btn-success" href="/admin">Admin panel</a></p>
+                  <p><a class="btn btn-success" href="{{ BASE_URL }}/admin">Admin panel</a></p>
                   {% endif %}
               </div>
           </li>
@@ -46,7 +46,7 @@
               </div>
           </a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="/user/logout">Log out</a></li>
+          <li><a class="dropdown-item" href="{{ BASE_URL }}/user/logout">Log out</a></li>
       </ul>
   </div>
   </header>

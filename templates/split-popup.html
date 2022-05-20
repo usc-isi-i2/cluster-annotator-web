@@ -33,7 +33,7 @@ function load_modal(cid){
     //console.log(cid, next_cid);
 
     $.ajax({
-        url: '/annotation/{{ data['mode'] }}/' + cid,
+        url: '{{ BASE_URL }}/annotation/{{ data['mode'] }}/' + cid,
         type: 'get',
         data: null,
         success: function(response){
@@ -61,7 +61,7 @@ function save() {
     }
 
     $.ajax({
-        url: '/annotation/{{ data['mode'] }}/' + cid,
+        url: '{{ BASE_URL }}/annotation/{{ data['mode'] }}/' + cid,
         type: 'post',
         data: form_data,
         processData: false,

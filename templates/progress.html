@@ -12,7 +12,7 @@
     {% if 'records' in data %}
     <p>
         <h1 class="d-inline">{{ data['mode'].capitalize() }} Progress</h1>
-        <span class="d-inline ms-2">(records <a href="/progress?view=clusters" class="link-success"><i class="bi bi-arrow-left-right"></i></a>)</span>
+        <span class="d-inline ms-2">(records <a href="{{ BASE_URL }}/progress?view=clusters" class="link-success"><i class="bi bi-arrow-left-right"></i></a>)</span>
     </p>
     <div class="row g-5 pt-3">
         <div class="col-md-12 overflow-auto">
@@ -21,7 +21,7 @@
                    data-show-columns="false"
                    data-sortable="true"
                    data-sort-reset="true"
-                   data-url="/progress/data?view=records"
+                   data-url="{{ BASE_URL }}/progress/data?view=records"
                    data-side-pagination="server"
                    data-pagination="true"
                    data-page-size="50"
@@ -42,7 +42,7 @@
     {% else %}
     <p>
         <h1 class="d-inline">{{ data['mode'].capitalize() }} Progress</h1>
-        <span class="d-inline ms-2">(clusters <a href="/progress?view=records" class="link-success"><i class="bi bi-arrow-left-right"></i></a>)</span>
+        <span class="d-inline ms-2">(clusters <a href="{{ BASE_URL }}/progress?view=records" class="link-success"><i class="bi bi-arrow-left-right"></i></a>)</span>
     </p>
     <div class="row g-5 pt-3">
         <div class="col-md-12 overflow-auto">
@@ -51,7 +51,7 @@
                    data-show-columns="false"
                    data-sortable="true"
                    data-sort-reset="true"
-                   data-url="/progress/data?view=clusters"
+                   data-url="{{ BASE_URL }}/progress/data?view=clusters"
                    data-side-pagination="server"
                    data-pagination="true"
                    data-page-size="50"

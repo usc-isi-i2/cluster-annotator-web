@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cluster Annotator</title>
+    <title>{{ APP_NAME }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-    <link href="/static/login.css" rel="stylesheet">
+    <link href="{{ BASE_URL }}/static/login.css" rel="stylesheet">
 </head>
 <body class="text-center">
 
@@ -16,10 +16,10 @@
             <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
             <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
         </svg>
-        <span class="fs-4 ms-2">Cluster Annotator</span>
+        <span class="fs-4 ms-2">{{ APP_NAME }}</span>
     </div>
 
-    <form action="/user/login" method="post">
+    <form action="{{ BASE_URL }}/user/login" method="post">
         {% if 'error' in message %}
             <div class="alert alert-danger" role="alert">
                 {{ message['error'] }}

@@ -16,7 +16,7 @@
         {% if data['mode'] == 'idle' %}
         <p>Please specify a mode to start with.</p>
         <p>
-        <form method="post" action="/admin/mode">
+        <form method="post" action="{{ BASE_URL }}/admin/mode">
             <div class="d-grid gap-2 col-2">
                 <input type="submit" class="btn btn-success" name="mode" value="Split" />
                 <input type="submit" class="btn btn-outline-success" name="mode" value="Merge" />
@@ -31,7 +31,7 @@
         </p>
         <div class="modal fade" id="confirm-generate" tabindex="-1" aria-labelledby="confirm-generate-label" aria-hidden="true">
             <div class="modal-dialog">
-                <form method="post" action="/admin/generate">
+                <form method="post" action="{{ BASE_URL }}/admin/generate">
                     <div class="modal-content">
                         <!--<div class="modal-header">
                             <h5 class="modal-title" id="confirm-generate-label">Confirmation</h5>

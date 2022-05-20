@@ -10,7 +10,7 @@
     {% endif %}
 
     <p><h1>Select clusters to {{ data['mode'] }}</h1></p>
-    <form action="/annotation" method="get" class="form-search row g3">
+    <form action="{{ BASE_URL }}/annotation" method="get" class="form-search row g3">
         <div class="input-group mb-3">
             <input type="search" class="form-control" placeholder="Keywords for search or empty for random" id="query" name="query" value="" autofocus aria-label="" aria-describedby="search-btn">
             <span class="input-group-text" id="search-btn">
