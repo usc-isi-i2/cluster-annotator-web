@@ -241,6 +241,7 @@ class Meta(db.Model):
     # record_class_params: json.dumps({'cols': []})
     # record_repr_format: 'addr: {address}'
     # task_id: str(6)
+    # record_fingerprint_format: '{name}-{address}'
 
     @classmethod
     def get(cls, key):

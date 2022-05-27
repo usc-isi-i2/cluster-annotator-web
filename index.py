@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from flask import current_app as app
@@ -237,51 +237,33 @@ def split(cluster_id):
     data['cluster_name'] = Cluster.query.get(cluster_id).records[0]
 
     records = {}
+    fingerprints = {}
     for r in Cluster.query.get(cluster_id).records:
         records[r.id] = {c: getattr(r, c) for c in cols}
         records[r.id]['new_cid'] = r.relations[0].new_cid or 0
+
+        # compute record fingerprint
+        try:
+            fingerprint_fmt = Meta.get('record_fingerprint_format')
+            if fingerprint_fmt:
+                fingerprint = fingerprint_fmt.format(**{c: getattr(r, c).lower() for c in cols})
+                fingerprints[r.id] = fingerprint
+        except:
+            pass
+
     data['records'] = records
+
+    # fingerprint str -> fingerprint id
+    if len(fingerprints):
+        data['record_fingerprints'] = {}
+
+        # sort the number of fingerprints in descending order
+        fingerprint_rank = {y[0]: idx for idx, y in enumerate(
+            sorted(Counter(fingerprints.values()).items(), key=lambda x: x[1], reverse=True))}
+
+        # assign fingerprint id
+        for rid, fp in fingerprints.items():
+            data['record_fingerprints'][rid] = fingerprint_rank[fp]
 
     status_code = 200 if 'error' not in message else 400
     return render_template('split.html', data=data, message=message), status_code
-
-
-# @index_bp.route('/annotation/merge/<cluster_id>', methods=['GET', 'POST'])
-# @flask_login.login_required
-# def merge(cluster_id):
-#     message = {}
-#     data = {'cluster_id': cluster_id}
-#
-#     Record = app.config['record_class']
-#     import json
-#     cols = json.loads(Meta.get('record_class_params'))['cols']
-#     data['data_columns'] = cols
-#     data['cluster_name'] = Cluster.query.get(cluster_id).records[0]
-#
-#     return render_template('merge.html', data=data, message=message)
-
-
-# @index_bp.route('/annotation/search')
-# @flask_login.login_required
-# def search():
-#     Record = app.config['record_class']
-#     Cluster = app.config['cluster_class']
-#     RecordClusterRelation = app.config['record_cluster_relation_class']
-#
-#     message = {}
-#     data = {}
-#     args = request.args.to_dict()
-#
-#     if 'search' in args:
-#         query_text = args['query'].strip()
-#         results = db.session.query(Cluster, func.count(Record.id)) \
-#             .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
-#             .join(Record, RecordClusterRelation.rid == Record.id) \
-#             .filter(Record.__ts_vec__.match(query_text)) \
-#             .filter(Cluster.annotation == None) \
-#             .group_by(Cluster.id).limit(10).all()
-#         clusters = {c.id: {'name': c.records[0], 'size': len(c.relations), 'hits': cnt} for c, cnt in results}
-#         data['clusters'] = clusters
-#
-#     # return render_template('merge.html', data=data, message=message)
-#     return ''

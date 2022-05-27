@@ -52,29 +52,6 @@ function load_modal(cid){
     });
 }
 
-function save() {
-    var cid = $('input[name=save]').attr('data-cid');
-    var annotations = $('#annotation-table input');  // #annotation-table is the inner table for annotation
-    var form_data = new FormData();
-    for (let i = 0; i < annotations.length; i++) {
-        form_data.append(annotations[i].id, annotations[i].value);
-    }
-
-    $.ajax({
-        url: '{{ BASE_URL }}/annotation/{{ data['mode'] }}/' + cid,
-        type: 'post',
-        data: form_data,
-        processData: false,
-        contentType: false,
-        success: function(response){
-            $('#popup').modal('hide');
-        },
-        error: function(response) {
-            $('.modal-body').html(response.responseText);
-        }
-    });
-}
-
 $(document).ready(function(){
     // #list-table is the outer table that lists all clusters to be annotated
     $('#list-table').on('click-row.bs.table', function (row, $element, field) {
@@ -83,7 +60,7 @@ $(document).ready(function(){
     });
 
     $('input[name=save-next]').on('click', function() {
-        save();
+        save_annotation();
         var cid = $(this).attr('data-next-cid');
 
         // https://github.com/twbs/bootstrap/issues/3902
@@ -96,7 +73,7 @@ $(document).ready(function(){
     });
 
     $('input[name=save]').on('click', function() {
-        save();
+        save_annotation();
     });
 
     /*$('.modal').on('keydown', function(e) {

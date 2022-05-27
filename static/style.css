@@ -65,3 +65,7 @@ a {
 .dropdown-item.active, .dropdown-item:active {
     background-color: var(--bs-green);
 }
+
+tr[data-fingerprint]:not([data-fingerprint='0']) {
+    background-color: #fcf8e3;
+}

@@ -27,7 +27,11 @@
               </thead>
               <tbody>
               {% for rid, row in data['records'].items() %}
+                  {% if 'record_fingerprints' in data %}
+                  <tr data-fingerprint="{{ data['record_fingerprints'][rid] }}">
+                  {% else %}
                   <tr>
+                  {% endif %}
                       <td><input id="rid-{{ rid }}" name="rid-{{ rid }}" type="text" size=3 value="{{ row['new_cid'] }}" style="text-align:right" /></td>
                       {% for k, v in row.items() %}
                           {% if k != 'new_cid' %}
@@ -44,3 +48,28 @@
     </form>
 
 </div>
+
+<script>
+function save_annotation() {
+    var cid = $('input[name=save]').attr('data-cid');
+    var annotations = $('#annotation-table input');
+    var form_data = new FormData();
+    for (let i = 0; i < annotations.length; i++) {
+        form_data.append(annotations[i].id, annotations[i].value);
+    }
+
+    $.ajax({
+        url: '{{ BASE_URL }}/annotation/split/' + cid,
+        type: 'post',
+        data: form_data,
+        processData: false,
+        contentType: false,
+        success: function(response){
+            $('#popup').modal('hide');
+        },
+        error: function(response) {
+            $('.modal-body').html(response.responseText);
+        }
+    });
+}
+</script>
