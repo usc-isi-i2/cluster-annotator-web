@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from collections import defaultdict, Counter
+import string
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from flask import current_app as app
@@ -11,6 +12,8 @@ import utils
 
 login_manager = flask_login.LoginManager()
 index_bp = Blueprint('index_bp', __name__)
+
+punctuations = set(string.punctuation)
 
 
 @index_bp.route('/ping')
@@ -247,6 +250,7 @@ def split(cluster_id):
             fingerprint_fmt = Meta.get('record_fingerprint_format')
             if fingerprint_fmt:
                 fingerprint = fingerprint_fmt.format(**{c: getattr(r, c).lower() for c in cols})
+                fingerprint = ' '.join(''.join(' ' if ch in punctuations else ch for ch in fingerprint).split())  # remove all punctuations and consecutive whitespaces
                 fingerprints[r.id] = fingerprint
         except:
             pass
