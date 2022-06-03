@@ -1,0 +1,141 @@
+<div>
+    {% if 'error' in message %}
+        <div class="alert alert-danger" role="alert">
+            {{ message['error'] }}
+        </div>
+    {% endif %}
+
+    <p><h1>Merge Cluster <mark>{{ data['cluster_id'] }}</mark></h1></p>
+    <p><em>{{ data['cluster_name'] }}</em></p>
+    <form action="{{ BASE_URL }}/merge/{{ data['cluster_id'] }}" method="post">
+        <p class="pt-1">
+        <div class="row g-5">
+            <div class="col-6">
+                <h4>Selected candidates</h4>
+                <table class="table table-borderless">
+                    <tbody>
+                    <tr><td>{{ data['cluster_id'] }}</td><td>{{ data['cluster_name'] }}</td><td><span class="badge rounded-pill bg-success">Current</span></td></tr>
+                    </tbody>
+                </table>
+                <table id="selected-table" class="table table-hover" data-toggle="table" data-search="true" data-sortable="true" data-show-columns="false" data-sort-reset="true">
+                    <tbody>
+                    {% for c in data['selected_clusters'] %}
+                        <tr data-cid="{{ c['id'] }}"><td>{{ c['id'] }}</td><td>{{ c['name'] }}</td><td><i role="button" class="bi bi-dash-circle"></i></td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-6">
+                <h4>Finding candidates</h4>
+                <div class="row g-3">
+                    <div class="input-group mb-3">
+                        <input type="search" class="form-control" placeholder="Keywords" id="merge-query" name="merge-query" value="" autofocus aria-label="" aria-describedby="merge-search-btn">
+                        <span class="input-group-text" id="merge-search-btn">
+                            <button type="button" class="btn btn-sm" id="merge-search" name="merge-search" value="Search">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <table id="candidate-table" class="table table-hover" data-toggle="table" data-search="true" data-sortable="true" data-show-columns="false" data-sort-reset="true">
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        </p>
+    </form>
+
+</div>
+
+<script>
+$(document).ready(function(){
+
+    // candidate search
+    $('#merge-search').on('click', function(){
+
+        // query
+        var query_text = $('#merge-query').val();
+
+        // get all selected cluster ids
+        var selected_clusters =$('#selected-table tr').map(function(){
+            return $(this).attr('data-cid');
+        }).get();
+        selected_clusters.push('{{ data['cluster_id'] }}');
+
+        var data = {'query': query_text, 'not_in': selected_clusters};
+
+        // search
+        $.ajax({
+            url: '{{ BASE_URL }}/annotation/merge/search',
+            type: 'post',
+            data: JSON.stringify(data),
+            processData: false,
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function(response){
+                var clusters = response['clusters'];
+                var table_html = '';
+                for (var cid in clusters) {
+                    table_html = table_html + '<tr data-cid="' + cid + '">' +
+                        '<td>' + cid + '</td>' +
+                        '<td>' + clusters[cid]['name'] + '</td>' +
+                        '<td><i role="button" class="bi bi-plus-circle"></i></td>' +
+                        '</tr>'
+                }
+                table_html = '<tbody>' + table_html + '</tbody>'
+                $('#candidate-table').html(table_html);
+            },
+            error: function(response) {
+                $('.modal-body').html(response.responseText);
+            }
+        });
+    });
+
+    // candidate table -> selected table
+    $(document).on('click', '#candidate-table i.bi-plus-circle', function(){
+        var tr_element = $(this).closest('tr');
+        tr_element.find('i.bi-plus-circle').removeClass('bi-plus-circle').addClass('bi-dash-circle');
+        $('#selected-table tbody').append(tr_element);
+    });
+
+    // remove from selected table
+    $(document).on('click', '#selected-table i.bi-dash-circle', function(){
+        var tr_element = $(this).closest('tr');
+        tr_element.remove();
+    });
+});
+
+function save_annotation() {
+    var cid = $('input[name=save]').attr('data-cid');
+
+    // get all selected cluster ids
+    var selected_clusters =$('#selected-table tr').map(function(){
+        return $(this).attr('data-cid');
+    }).get();
+    if (selected_clusters.length > 0) {  // only add current cluster when there is more than one cluster selected
+        selected_clusters.push('{{ data['cluster_id'] }}');
+    }
+
+    var form_data = new FormData();
+    for (let i = 0; i < selected_clusters.length; i++) {
+        form_data.append(selected_clusters[i], cid);
+    }
+
+    $.ajax({
+        url: '{{ BASE_URL }}/annotation/merge/' + cid,
+        type: 'post',
+        data: form_data,
+        processData: false,
+        contentType: false,
+        success: function(response){
+            $('#popup').modal('hide');
+        },
+        error: function(response) {
+            $('.modal-body').html(response.responseText);
+        }
+    });
+}
+</script>

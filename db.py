@@ -221,12 +221,12 @@ def recover_cluster_record_relation_class(task_id):
 
 def bind_relationships(record_class, cluster_class, cluster_record_relation_class):
     # Record
-    record_class.relations = db.relationship('RecordClusterRelation', lazy=True)
-    record_class.clusters = db.relationship('Cluster', secondary=cluster_record_relation_class.__table__, lazy=True,
+    record_class.relations = db.relationship(cluster_record_relation_class, lazy=True)
+    record_class.clusters = db.relationship(cluster_class, secondary=cluster_record_relation_class.__table__, lazy=True,
                                             backref=db.backref('records', lazy=True))
 
     # Cluster
-    cluster_class.relations = db.relationship('RecordClusterRelation', lazy=True)
+    cluster_class.relations = db.relationship(cluster_record_relation_class, lazy=True)
 
 
 class Meta(db.Model):

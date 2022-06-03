@@ -39,7 +39,14 @@ def get_config(filename):
         return json.load(f)
 
 
-def gen_new_cid(old_cid, new_cid):
-    if new_cid is None:
-        new_cid = 0
-    return f'{old_cid}-{new_cid}'
+def gen_new_cid(old_cid, new_cid, mode):
+    if mode == 'split':
+        if new_cid is None:
+            new_cid = 0
+        return f'{old_cid}-{new_cid}'
+    elif mode == 'merge':
+        if new_cid is None:
+            return old_cid
+        else:
+            return new_cid
+

@@ -56,8 +56,9 @@ def generate():
     RecordClusterRelation = app.config['record_cluster_relation_class']
 
     record_to_cluster = {}
+    mode = Meta.get('mode')
     for rel in RecordClusterRelation.query.all():
-        record_to_cluster[rel.rid] = utils.gen_new_cid(rel.cid, rel.new_cid)
+        record_to_cluster[rel.rid] = utils.gen_new_cid(rel.cid, rel.new_cid, mode)
     cluster_to_record = defaultdict(list)
     for rid, cid in record_to_cluster.items():
         cluster_to_record[cid].append(rid)
@@ -84,7 +85,7 @@ def generate():
         RecordClusterRelation.__table__.create(db.engine, checkfirst=True)
         bind_relationships(Record, Cluster, RecordClusterRelation)
         app.config['cluster_class'] = Cluster
-        app.config['record_cluster_relation_cluster'] = RecordClusterRelation
+        app.config['record_cluster_relation_class'] = RecordClusterRelation
 
         for c in clusters:
             cid = c['cid']
@@ -101,13 +102,20 @@ def generate():
         Meta.set('mode', prev_mode)
         Meta.set('task_id', prev_task_id)
 
-        del Cluster
-        del RecordClusterRelation
+        try:
+            del RecordClusterRelation
+        except:
+            pass
+        try:
+            del Cluster
+        except:
+            pass
+
         Cluster = construct_cluster_class(prev_task_id)
         RecordClusterRelation = construct_cluster_record_relation_class(prev_task_id)
         bind_relationships(Record, Cluster, RecordClusterRelation)
         app.config['cluster_class'] = Cluster
-        app.config['record_cluster_relation_cluster'] = RecordClusterRelation
+        app.config['record_cluster_relation_class'] = RecordClusterRelation
 
         message['error'] = f'Failed to apply annotations.\n{e}'
 

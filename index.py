@@ -101,6 +101,7 @@ def progress_data():
     # search = args.get('search')
 
     if view == 'records':
+        mode = Meta.get('mode')
         total_count = Record.query.count()
 
         import json
@@ -111,7 +112,7 @@ def progress_data():
             rr['cid'] = r.relations[0].cid
             if Meta.get('mode') == 'split':
                 if r.relations[0].new_cid:
-                    rr['new_cid'] = utils.gen_new_cid(r.relations[0].cid, r.relations[0].new_cid)
+                    rr['new_cid'] = utils.gen_new_cid(r.relations[0].cid, r.relations[0].new_cid, mode)
                 else:
                     rr['new_cid'] = ''
             else:
@@ -271,3 +272,91 @@ def split(cluster_id):
 
     status_code = 200 if 'error' not in message else 400
     return render_template('split.html', data=data, message=message), status_code
+
+@index_bp.route('/annotation/merge/<cluster_id>', methods=['GET', 'POST'])
+@flask_login.login_required
+def merge(cluster_id):
+    Record = app.config['record_class']
+    Cluster = app.config['cluster_class']
+    RecordClusterRelation = app.config['record_cluster_relation_class']
+
+    message = {}
+    data = {'cluster_id': cluster_id}
+
+    if request.method == 'POST':
+
+        # remove all previous existing annotated clusters
+        prev_new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
+        if prev_new_cid:
+            results = db.session.query(Cluster, RecordClusterRelation) \
+                .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
+                .filter(RecordClusterRelation.new_cid == prev_new_cid).all()
+            for (c, rel) in results:
+                rel.new_cid = None
+                c.annotation = None
+                c.annotated_by = None
+                c.annotated_at = None
+
+        db.session.commit()
+
+        # merge clusters
+        for cid, new_cid in request.form.to_dict().items():
+
+            cluster = Cluster.query.get(cid)
+            cluster.annotation = CLUSTER_ANNOTATION_ANNOTATED
+            cluster.annotated_by = flask_login.current_user.id
+            cluster.annotated_at = datetime.now(timezone.utc)
+
+            # update relation
+            relations = RecordClusterRelation.query.filter_by(cid=cid).all()
+            for r in relations:
+                r.new_cid = new_cid
+
+        db.session.commit()
+
+    data['cluster_name'] = Cluster.query.get(cluster_id).records[0]
+    data['selected_clusters'] = []
+
+    new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
+    if new_cid:
+        results = db.session.query(Cluster) \
+            .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
+            .filter(RecordClusterRelation.new_cid == new_cid) \
+            .filter(Cluster.id != cluster_id) \
+            .distinct(Cluster.id).all()
+        data['selected_clusters'] = [{'id': c.id, 'name': str(c.records[0])} for c in results]
+
+    status_code = 200 if 'error' not in message else 400
+    return render_template('merge.html', data=data, message=message), status_code
+
+
+@index_bp.route('/annotation/merge/search', methods=['POST'])
+@flask_login.login_required
+def merge_search():
+    Record = app.config['record_class']
+    Cluster = app.config['cluster_class']
+    RecordClusterRelation = app.config['record_cluster_relation_class']
+
+    json_input = request.get_json()  # {'query': str, 'not_in': list}
+    json_ret = {}
+
+    try:
+        query_text = json_input['query'].strip()
+        results = db.session.query(Cluster, func.count(Record.id)) \
+            .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
+            .join(Record, RecordClusterRelation.rid == Record.id) \
+            .filter(Cluster.annotation == None) \
+            .filter(Record.__ts_vec__.match(query_text))
+
+        not_in_list = json_input.get('not_in')
+        if not_in_list:
+            not_in_list = tuple(not_in_list)
+            results = results.filter(Cluster.id.notin_(not_in_list))
+
+        results = results.group_by(Cluster.id).limit(10).all()  # .all().distinct(Cluster.id)
+        clusters = {c.id: {'name': str(c.records[0]), 'size': len(c.relations), 'hits': cnt} for c, cnt in results}
+        json_ret['clusters'] = clusters
+    except Exception as e:
+        json_ret['error'] = f'Invalid parameters.\n{e}'
+
+    return jsonify(json_ret)
