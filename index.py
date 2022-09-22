@@ -5,7 +5,7 @@ import string
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from flask import current_app as app
 import flask_login
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 from db import *
 import utils
@@ -134,12 +134,17 @@ def progress_data():
                 CLUSTER_ANNOTATION_IGNORED: 'Ignored'
             }[s]
 
+        results = db.session.query(Cluster, func.count(RecordClusterRelation.rid).label('c_size'))\
+            .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid)\
+            .group_by(Cluster).order_by(desc('c_size'))\
+            .offset(offset).limit(limit).all()
+
         clusters = [{'id': c.id,
                      'name': str(c.records[0]),
-                     'size': len(c.relations),
+                     'size': c_size,
                      'status': convert_status(c.annotation),
                      'by': User.query.get(c.annotated_by).email if c.annotated_by else ''}
-                    for c in Cluster.query.offset(offset).limit(limit).all()]
+                    for c, c_size in results]
 
         json_ret = {
             'total': total_count,
