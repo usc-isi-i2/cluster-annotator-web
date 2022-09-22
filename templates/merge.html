@@ -14,13 +14,17 @@
                 <h4>Selected candidates</h4>
                 <table class="table table-borderless">
                     <tbody>
-                    <tr><td>{{ data['cluster_id'] }}</td><td>{{ data['cluster_name'] }}</td><td><span class="badge rounded-pill bg-success">Current</span></td></tr>
+                    <tr data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-repr" data-bs-title="{{ data['repr_record'] }}">
+                        <td>{{ data['cluster_id'] }}</td><td>{{ data['cluster_name'] }}</td><td><span class="badge rounded-pill bg-success">Current</span></td>
+                    </tr>
                     </tbody>
                 </table>
                 <table id="selected-table" class="table table-hover" data-toggle="table" data-search="true" data-sortable="true" data-show-columns="false" data-sort-reset="true">
                     <tbody>
                     {% for c in data['selected_clusters'] %}
-                        <tr data-cid="{{ c['id'] }}"><td>{{ c['id'] }}</td><td>{{ c['name'] }}</td><td><i role="button" class="bi bi-dash-circle"></i></td></tr>
+                        <tr data-cid="{{ c['id'] }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-repr" data-bs-title="{{ c['repr_record'] }}">
+                            <td>{{ c['id'] }}</td><td>{{ c['name'] }}</td><td><i role="button" class="bi bi-dash-circle"></i></td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -51,7 +55,13 @@
 </div>
 
 <script>
+
 $(document).ready(function(){
+    //const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    //const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    $('body').tooltip({
+        selector: '[data-bs-toggle="tooltip"]'
+    });
 
     // candidate search
     $('#merge-search').on('click', function(){
@@ -79,7 +89,9 @@ $(document).ready(function(){
                 var clusters = response['clusters'];
                 var table_html = '';
                 for (var cid in clusters) {
-                    table_html = table_html + '<tr data-cid="' + cid + '">' +
+                    table_html = table_html + '<tr data-cid="' + cid +
+                        '" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-repr"' +
+                        'data-bs-title="' + clusters[cid]['repr_record'] + '">' +
                         '<td>' + cid + '</td>' +
                         '<td>' + clusters[cid]['name'] + '</td>' +
                         '<td><i role="button" class="bi bi-plus-circle"></i></td>' +
@@ -115,9 +127,8 @@ function save_annotation() {
     var selected_clusters =$('#selected-table tr').map(function(){
         return $(this).attr('data-cid');
     }).get();
-    if (selected_clusters.length > 0) {  // only add current cluster when there is more than one cluster selected
-        selected_clusters.push('{{ data['cluster_id'] }}');
-    }
+    // always select current cluster itself
+    selected_clusters.push('{{ data['cluster_id'] }}');
 
     var form_data = new FormData();
     for (let i = 0; i < selected_clusters.length; i++) {

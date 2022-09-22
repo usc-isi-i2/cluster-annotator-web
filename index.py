@@ -284,24 +284,34 @@ def merge(cluster_id):
     data = {'cluster_id': cluster_id}
 
     if request.method == 'POST':
+        new_cid_assignments = {}
 
-        # remove all previous existing annotated clusters
+        # find all previously merged clusters
+        prev_set = set([])
         prev_new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
         if prev_new_cid:
             results = db.session.query(Cluster, RecordClusterRelation) \
                 .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
                 .filter(RecordClusterRelation.new_cid == prev_new_cid).all()
-            for (c, rel) in results:
-                rel.new_cid = None
-                c.annotation = None
-                c.annotated_by = None
-                c.annotated_at = None
+            prev_set = set([c.id for (c, rel) in results])
 
-        db.session.commit()
+        # selected clusters
+        curr_set = set([cid for cid, new_cid in request.form.to_dict().items()])
 
-        # merge clusters
+        # remove clusters that are in previous selection but have been removed currently
+        # assign an alternative new_cid to such clusters
+        removed_cids = list(prev_set - curr_set)
+        if len(removed_cids) > 0:
+            new_cid = removed_cids[0]
+            for cid in removed_cids:
+                new_cid_assignments[cid] = new_cid
+
+        # assign new_cid to current selected clusters
         for cid, new_cid in request.form.to_dict().items():
+            new_cid_assignments[cid] = new_cid
 
+        # apply new_cid to clusters
+        for cid, new_cid in new_cid_assignments.items():
             cluster = Cluster.query.get(cid)
             cluster.annotation = CLUSTER_ANNOTATION_ANNOTATED
             cluster.annotated_by = flask_login.current_user.id
@@ -314,8 +324,10 @@ def merge(cluster_id):
 
         db.session.commit()
 
-    data['cluster_name'] = Cluster.query.get(cluster_id).records[0]
+    repr_record = Cluster.query.get(cluster_id).records[0]
+    data['cluster_name'] = str(repr_record)
     data['selected_clusters'] = []
+    data['repr_record'] = repr_record.full_repr()
 
     new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
     if new_cid:
@@ -324,7 +336,8 @@ def merge(cluster_id):
             .filter(RecordClusterRelation.new_cid == new_cid) \
             .filter(Cluster.id != cluster_id) \
             .distinct(Cluster.id).all()
-        data['selected_clusters'] = [{'id': c.id, 'name': str(c.records[0])} for c in results]
+        data['selected_clusters'] = [
+            {'id': c.id, 'name': str(c.records[0]), 'repr_record': c.records[0].full_repr()} for c in results]
 
     status_code = 200 if 'error' not in message else 400
     return render_template('merge.html', data=data, message=message), status_code
@@ -345,8 +358,8 @@ def merge_search():
         results = db.session.query(Cluster, func.count(Record.id)) \
             .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
             .join(Record, RecordClusterRelation.rid == Record.id) \
-            .filter(Cluster.annotation == None) \
             .filter(Record.__ts_vec__.match(query_text))
+        # .filter(Cluster.annotation == None) \  # comment out this line, because
 
         not_in_list = json_input.get('not_in')
         if not_in_list:
@@ -354,7 +367,7 @@ def merge_search():
             results = results.filter(Cluster.id.notin_(not_in_list))
 
         results = results.group_by(Cluster.id).limit(10).all()  # .all().distinct(Cluster.id)
-        clusters = {c.id: {'name': str(c.records[0]), 'size': len(c.relations), 'hits': cnt} for c, cnt in results}
+        clusters = {c.id: {'name': str(c.records[0]), 'repr_record': c.records[0].full_repr(), 'size': len(c.relations), 'hits': cnt} for c, cnt in results}
         json_ret['clusters'] = clusters
     except Exception as e:
         json_ret['error'] = f'Invalid parameters.\n{e}'

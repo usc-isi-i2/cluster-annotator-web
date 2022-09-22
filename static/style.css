@@ -69,3 +69,7 @@ a {
 tr[data-fingerprint]:not([data-fingerprint='0']) {
     background-color: #fcf8e3;
 }
+
+.tooltip-repr {
+    --bs-tooltip-max-width: 500px;
+}

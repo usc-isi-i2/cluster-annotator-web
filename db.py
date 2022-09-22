@@ -131,6 +131,11 @@ def construct_record_class(cols):
         return fmt_str.format(**{col: getattr(self, col) for col in cols})
     record_class.__repr__ = repr
 
+    def full_repr(self):
+        return '\n'.join([f'{col}: {getattr(self, col)}' for col in cols])
+    record_class.full_repr = full_repr
+
+
     # bind relationships
     # record_class.relations = db.relationship('RecordClusterRelation', lazy=True)
     # record_class.clusters = db.relationship('Cluster', secondary=RecordClusterRelation.__table__, lazy=True,
