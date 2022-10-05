@@ -1,0 +1,26 @@
+<div class="col-md-12 overflow-auto">
+    <h1>Cluster <mark>{{ data['cluster_id'] }}</mark></h1>
+    <table class="table table-hover" id="cluster-detail-table"
+           data-toggle="table"
+           data-search="true"
+           data-sortable="true"
+           data-show-columns="false"
+           data-sort-reset="true">
+        <thead>
+        <tr>
+            {% for col in data['data_columns'] %}
+                <th scope="col" data-sortable="true">{{ col }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in data['records'] %}
+            <tr>
+                {% for k, v in row.items() %}
+                    <td scope="row">{{ v }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

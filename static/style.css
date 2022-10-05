@@ -7,6 +7,12 @@
 
 .annotation-dialog {
     max-width: 90%;
+    top: 5%;
+}
+
+.popup-second-dialog {
+    max-width: 85%;
+    top: 10%;
 }
 
 input[type=search]::-webkit-search-cancel-button {
@@ -24,6 +30,10 @@ input[type=search]::-webkit-search-cancel-button {
 }
 
 #annotation-table > tbody > tr > td {
+    white-space: nowrap;
+}
+
+#cluster-detail-table > tbody > tr > td {
     white-space: nowrap;
 }
 

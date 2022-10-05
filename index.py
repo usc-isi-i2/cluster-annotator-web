@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from collections import defaultdict, Counter
 import string
+import json
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from flask import current_app as app
@@ -54,7 +55,6 @@ def progress():
 
     view = args.get('view')
     if view == 'records':
-        import json
         cols = json.loads(Meta.get('record_class_params'))['cols']
 
         # records = {}
@@ -104,7 +104,6 @@ def progress_data():
         mode = Meta.get('mode')
         total_count = Record.query.count()
 
-        import json
         cols = json.loads(Meta.get('record_class_params'))['cols']
         records = []
         for r in Record.query.offset(offset).limit(limit).all():
@@ -240,7 +239,6 @@ def split(cluster_id):
         # submit
         db.session.commit()
 
-    import json
     cols = json.loads(Meta.get('record_class_params'))['cols']
     data['data_columns'] = cols
     data['cluster_name'] = Cluster.query.get(cluster_id).records[0]
@@ -378,3 +376,21 @@ def merge_search():
         json_ret['error'] = f'Invalid parameters.\n{e}'
 
     return jsonify(json_ret)
+
+
+@index_bp.route('/cluster/<cluster_id>', methods=['GET'])
+@flask_login.login_required
+def cluster(cluster_id):
+    Record = app.config['record_class']
+    Cluster = app.config['cluster_class']
+    RecordClusterRelation = app.config['record_cluster_relation_class']
+
+    data = {}
+    cols = json.loads(Meta.get('record_class_params'))['cols']
+    data['data_columns'] = cols
+    data['cluster_id'] = cluster_id
+
+    records = [{c: getattr(r, c) for c in cols} for r in Record.query.filter(Record.clusters.any(id=cluster_id)).all()]
+    data['records'] = records
+
+    return render_template('cluster_detail.html', data=data)

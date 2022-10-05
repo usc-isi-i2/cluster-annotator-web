@@ -16,6 +16,18 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="popup-second" tabindex="-1" aria-labelledby="popup-second-label" aria-hidden="true">
+    <div class="modal-dialog popup-second-dialog">
+        <div class="modal-content">
+            <div class="modal-body"></div>
+        </div>
+        <!--<div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" name="ok">OK</button>
+        </div>-->
+    </div>
+</div>
+
 <script>
 
 function load_modal(cid){
@@ -84,5 +96,28 @@ $(document).ready(function(){
 
 
 });
+
+
+/* support multiple modal overlay
+ * https://stackoverflow.com/questions/19305821/multiple-modals-overlay
+ */
+$(document).on({
+    'show.bs.modal': function() {
+        var zIndex = 1040 + (10 * $('.modal:visible').length);
+        $(this).css('z-index', zIndex);
+        setTimeout(function() {
+            $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+        }, 0);
+    },
+    'hidden.bs.modal': function() {
+        if ($('.modal:visible').length > 0) {
+            // restore the modal-open class to the body element, so that scrolling works
+            // properly after de-stacking a modal.
+            setTimeout(function() {
+                $(document.body).addClass('modal-open');
+            }, 0);
+        }
+    }
+}, '.modal');
 
 </script>

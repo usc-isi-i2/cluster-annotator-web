@@ -12,10 +12,10 @@
         <div class="row g-5">
             <div class="col-6">
                 <h4>Selected candidates</h4>
-                <table class="table table-borderless">
+                <table class="table table-borderless" id="current-table">
                     <tbody>
-                    <tr data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-repr" data-bs-title="{{ data['repr_record'] }}">
-                        <td>{{ data['cluster_id'] }}</td><td>{{ data['cluster_name'] }}</td><td><span class="badge rounded-pill bg-success">Current</span></td>
+                    <tr data-cid="{{ data['cluster_id'] }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-repr" data-bs-title="{{ data['repr_record'] }}">
+                        <td >{{ data['cluster_id'] }}</td><td>{{ data['cluster_name'] }}</td><td><span class="badge rounded-pill bg-success">Current</span></td>
                     </tr>
                     </tbody>
                 </table>
@@ -59,9 +59,9 @@
 $(document).ready(function(){
     //const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     //const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-    $('body').tooltip({
+    /*$('body').tooltip({
         selector: '[data-bs-toggle="tooltip"]'
-    });
+    });*/
 
     // candidate search
     $('#merge-search').on('click', function(){
@@ -107,16 +107,32 @@ $(document).ready(function(){
     });
 
     // candidate table -> selected table
-    $(document).on('click', '#candidate-table i.bi-plus-circle', function(){
+    $('#candidate-table').on('click', 'i.bi-plus-circle', function(e){
+        e.stopPropagation();  // stop propagating the click event to tr level
         var tr_element = $(this).closest('tr');
         tr_element.find('i.bi-plus-circle').removeClass('bi-plus-circle').addClass('bi-dash-circle');
         $('#selected-table tbody').append(tr_element);
     });
 
     // remove from selected table
-    $(document).on('click', '#selected-table i.bi-dash-circle', function(){
+    $('#selected-table').on('click', 'i.bi-dash-circle', function(e){
+        e.stopPropagation();  // stop propagating the click event to tr level
         var tr_element = $(this).closest('tr');
         tr_element.remove();
+    });
+
+    // show details if tr is clicked
+    $('#current-table').on('click', 'tr', function () {
+        var cid = $(this).attr('data-cid');
+        show_cluster_detail(cid);
+    });
+    $('#selected-table').on('click', 'tr', function () {
+        var cid = $(this).attr('data-cid');
+        show_cluster_detail(cid);
+    });
+    $('#candidate-table').on('click', 'tr', function () {
+        var cid = $(this).attr('data-cid');
+        show_cluster_detail(cid);
     });
 });
 
@@ -149,4 +165,17 @@ function save_annotation() {
         }
     });
 }
+
+function show_cluster_detail(cid){
+    $.ajax({
+        url: '{{ BASE_URL }}/cluster/' + cid,
+        type: 'get',
+        data: null,
+        success: function(response){
+            $('#popup-second .modal-body').html(response);
+            $('#popup-second').modal('show');
+        }
+    });
+}
+
 </script>
