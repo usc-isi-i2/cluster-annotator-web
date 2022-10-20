@@ -32,8 +32,8 @@
 
 function load_modal(cid){
     // $('#spinner').show();
-    $('.modal-body').html('');
-    $('.modal-content').hide();
+    $('#popup .modal-body').html('');
+    $('#popup .modal-content').hide();
 
     var cid_element = $('tr[data-cid=' + cid + ']');  // tr element
     var next_cid = null;
@@ -49,7 +49,7 @@ function load_modal(cid){
         type: 'get',
         data: null,
         success: function(response){
-            $('.modal-body').html(response);
+            $('#popup .modal-body').html(response);
             save_btn.attr('data-cid', cid);
             if (next_cid == null) {
                 next_btn.hide();
@@ -58,7 +58,7 @@ function load_modal(cid){
                 next_btn.attr('data-next-cid', next_cid);
             }
             // $('#spinner').hide();
-            $('.modal-content').show();
+            $('#popup .modal-content').show();
             $('#popup').modal('show');
         }
     });

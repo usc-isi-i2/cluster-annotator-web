@@ -11,7 +11,7 @@
         <p class="pt-1">
         <div class="row g-5">
             <div class="col-6">
-                <span><h4 class="d-inline">Selected candidates</h4> <span id="selected_count">({{ data['total_count'] }})</span></span>
+                <h4 class="d-inline">Selected candidates</h4> <span id="selected_count">({{ data['total_count'] }})</span>
                 <table class="table table-borderless" id="current-table">
                     <tbody>
                     <tr data-cid="{{ data['cluster_id'] }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-repr" data-bs-title="{{ data['repr_record'] }}">
@@ -30,7 +30,7 @@
                 </table>
             </div>
             <div class="col-6">
-                <span><h4 class="d-inline">Finding candidates</h4> <span id="cand_count"></span></span>
+                <h4 class="d-inline">Finding candidates</h4> <span id="cand_count"></span>
                 <div class="row g-3">
                     <div class="input-group mb-3">
                         <input type="search" class="form-control" placeholder="Keywords" id="merge-query" name="merge-query" value="" autofocus aria-label="" aria-describedby="merge-search-btn">
@@ -64,11 +64,8 @@ document.getElementById("merge-query").addEventListener("keyup", function(event)
 });
 
 $(document).ready(function(){
-    //const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    //const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-    /*$('body').tooltip({
-        selector: '[data-bs-toggle="tooltip"]'
-    });*/
+
+    // var remove_clusters = [];
 
     // candidate search
     $('#merge-search').on('click', function(){
@@ -81,7 +78,6 @@ $(document).ready(function(){
             return $(this).attr('data-cid');
         }).get();
         selected_clusters.push('{{ data['cluster_id'] }}');
-
         var data = {'query': query_text, 'not_in': selected_clusters};
 
         // search
@@ -109,7 +105,7 @@ $(document).ready(function(){
                 $('#cand_count').html('(' + response['total_count'] + ')');
             },
             error: function(response) {
-                $('.modal-body').html(response.responseText);
+                $('#popup .modal-body').html(response.responseText);
             }
         });
     });
@@ -169,7 +165,7 @@ function save_annotation() {
             $('#popup').modal('hide');
         },
         error: function(response) {
-            $('.modal-body').html(response.responseText);
+            $('#popup .modal-body').html(response.responseText);
         }
     });
 }
