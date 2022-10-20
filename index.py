@@ -78,7 +78,6 @@ def progress():
             'mode': Meta.get('mode'),
             'clusters': [],  # clusters,
             'user': {'email': flask_login.current_user.email, 'is_admin': flask_login.current_user.is_admin},
-
         }
 
     return render_template('progress.html', data=data, message=message)
@@ -330,6 +329,7 @@ def merge(cluster_id):
     repr_record = Cluster.query.get(cluster_id).records[0]
     data['cluster_name'] = str(repr_record)
     data['selected_clusters'] = []
+    data['total_count'] = 0
     data['repr_record'] = repr_record.full_repr()
 
     new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
@@ -338,9 +338,13 @@ def merge(cluster_id):
             .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
             .filter(RecordClusterRelation.new_cid == new_cid) \
             .filter(Cluster.id != cluster_id) \
-            .distinct(Cluster.id).all()
+            .distinct(Cluster.id)
+        data['total_count'] = results.count()
+
+        results = results.limit(10).all()
         data['selected_clusters'] = [
             {'id': c.id, 'name': str(c.records[0]), 'repr_record': c.records[0].full_repr()} for c in results]
+
 
     status_code = 200 if 'error' not in message else 400
     return render_template('merge.html', data=data, message=message), status_code
@@ -369,7 +373,10 @@ def merge_search():
             not_in_list = tuple(not_in_list)
             results = results.filter(Cluster.id.notin_(not_in_list))
 
-        results = results.group_by(Cluster.id).limit(10).all()  # .all().distinct(Cluster.id)
+        results = results.group_by(Cluster.id)
+        json_ret['total_count'] = results.count()
+
+        results.order_by(func.random()).limit(10).all()  # .all().distinct(Cluster.id)
         clusters = {c.id: {'name': str(c.records[0]), 'repr_record': c.records[0].full_repr(), 'size': len(c.relations), 'hits': cnt} for c, cnt in results}
         json_ret['clusters'] = clusters
     except Exception as e:
@@ -390,7 +397,10 @@ def cluster(cluster_id):
     data['data_columns'] = cols
     data['cluster_id'] = cluster_id
 
-    records = [{c: getattr(r, c) for c in cols} for r in Record.query.filter(Record.clusters.any(id=cluster_id)).all()]
+    results = Record.query.filter(Record.clusters.any(id=cluster_id))
+
+    data['total_count'] = results.count()
+    records = [{c: getattr(r, c) for c in cols} for r in results.order_by(func.random()).limit(50).all()]
     data['records'] = records
 
     return render_template('cluster_detail.html', data=data)

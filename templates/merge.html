@@ -11,7 +11,7 @@
         <p class="pt-1">
         <div class="row g-5">
             <div class="col-6">
-                <h4>Selected candidates</h4>
+                <span><h4 class="d-inline">Selected candidates</h4> <span id="selected_count">({{ data['total_count'] }})</span></span>
                 <table class="table table-borderless" id="current-table">
                     <tbody>
                     <tr data-cid="{{ data['cluster_id'] }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-repr" data-bs-title="{{ data['repr_record'] }}">
@@ -30,7 +30,7 @@
                 </table>
             </div>
             <div class="col-6">
-                <h4>Finding candidates</h4>
+                <span><h4 class="d-inline">Finding candidates</h4> <span id="cand_count"></span></span>
                 <div class="row g-3">
                     <div class="input-group mb-3">
                         <input type="search" class="form-control" placeholder="Keywords" id="merge-query" name="merge-query" value="" autofocus aria-label="" aria-describedby="merge-search-btn">
@@ -106,6 +106,7 @@ $(document).ready(function(){
                 }
                 table_html = '<tbody>' + table_html + '</tbody>'
                 $('#candidate-table').html(table_html);
+                $('#cand_count').html('(' + response['total_count'] + ')');
             },
             error: function(response) {
                 $('.modal-body').html(response.responseText);
