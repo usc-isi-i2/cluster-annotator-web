@@ -288,29 +288,29 @@ def merge(cluster_id):
     if request.method == 'POST':
         new_cid_assignments = {}
 
-        # find all previously merged clusters
-        prev_set = set([])
-        prev_new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
-        if prev_new_cid:
-            results = db.session.query(Cluster, RecordClusterRelation) \
-                .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
-                .filter(RecordClusterRelation.new_cid == prev_new_cid).all()
-            prev_set = set([c.id for (c, rel) in results])
+        # # find all previously merged clusters
+        # prev_set = set([])
+        # prev_new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
+        # if prev_new_cid:
+        #     results = db.session.query(Cluster, RecordClusterRelation) \
+        #         .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
+        #         .filter(RecordClusterRelation.new_cid == prev_new_cid).all()
+        #     prev_set = set([c.id for (c, rel) in results])
 
         # selected clusters
-        curr_set = set([cid for cid, new_cid in request.form.to_dict().items()])
+        curr_set = set([cid for cid, op in request.form.to_dict().items() if op == 'current'])
+        orig_set = set([cid for cid, op in request.form.to_dict().items() if op == 'original'])
+        added_set = curr_set - orig_set
+        removed_set = orig_set - curr_set
 
         # remove clusters that are in previous selection but have been removed currently
-        # assign an alternative new_cid to such clusters
-        removed_cids = list(prev_set - curr_set)
-        if len(removed_cids) > 0:
-            new_cid = removed_cids[0]
-            for cid in removed_cids:
-                new_cid_assignments[cid] = new_cid
+        # assign an alternative cid to such clusters
+        for cid in removed_set:
+            new_cid_assignments[cid] = cid
 
         # assign new_cid to current selected clusters
-        for cid, new_cid in request.form.to_dict().items():
-            new_cid_assignments[cid] = new_cid
+        for cid in added_set:
+            new_cid_assignments[cid] = cluster_id
 
         # apply new_cid to clusters
         for cid, new_cid in new_cid_assignments.items():
@@ -344,7 +344,6 @@ def merge(cluster_id):
         results = results.limit(10).all()
         data['selected_clusters'] = [
             {'id': c.id, 'name': str(c.records[0]), 'repr_record': c.records[0].full_repr()} for c in results]
-
 
     status_code = 200 if 'error' not in message else 400
     return render_template('merge.html', data=data, message=message), status_code

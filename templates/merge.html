@@ -65,7 +65,11 @@ document.getElementById("merge-query").addEventListener("keyup", function(event)
 
 $(document).ready(function(){
 
-    // var remove_clusters = [];
+    // store the original clusters for set difference computation
+    var original_clusters = $('#selected-table tr').map(function(){
+        return $(this).attr('data-cid');
+    }).get();
+    $('#selected-table').attr('data-original', JSON.stringify(original_clusters));
 
     // candidate search
     $('#merge-search').on('click', function(){
@@ -140,6 +144,7 @@ $(document).ready(function(){
     });
 });
 
+
 function save_annotation() {
     var cid = $('input[name=save]').attr('data-cid');
 
@@ -152,7 +157,11 @@ function save_annotation() {
 
     var form_data = new FormData();
     for (let i = 0; i < selected_clusters.length; i++) {
-        form_data.append(selected_clusters[i], cid);
+        form_data.append(selected_clusters[i], 'current');
+    }
+    var original_clusters = JSON.parse($('#selected-table').attr('data-original'));
+    for (let i = 0; i < original_clusters.length; i++) {
+        form_data.append(original_clusters[i], 'original');
     }
 
     $.ajax({
@@ -181,5 +190,4 @@ function show_cluster_detail(cid){
         }
     });
 }
-
 </script>
