@@ -41,6 +41,11 @@
                         </span>
                     </div>
                 </div>
+                <div class="text-center d-none" id="merge-search-spinner">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
                 <table id="candidate-table" class="table table-hover" data-toggle="table" data-search="true" data-sortable="true" data-show-columns="false" data-sort-reset="true">
                     <tbody>
 
@@ -73,6 +78,8 @@ $(document).ready(function(){
 
     // candidate search
     $('#merge-search').on('click', function(){
+        $('#merge-search-spinner').removeClass('d-none').show();
+        $('#candidate-table').html('');
 
         // query
         var query_text = $('#merge-query').val();
@@ -93,6 +100,7 @@ $(document).ready(function(){
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function(response){
+                $('#merge-search-spinner').hide();
                 var clusters = response['clusters'];
                 var table_html = '';
                 for (var cid in clusters) {
@@ -109,6 +117,7 @@ $(document).ready(function(){
                 $('#cand_count').html('(' + response['total_count'] + ')');
             },
             error: function(response) {
+                $('#merge-search-spinner').hide();
                 $('#popup .modal-body').html(response.responseText);
             }
         });
