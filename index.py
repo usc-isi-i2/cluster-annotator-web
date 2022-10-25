@@ -375,7 +375,7 @@ def merge_search():
         results = results.group_by(Cluster.id)
         json_ret['total_count'] = results.count()
 
-        results.order_by(func.random()).limit(10).all()  # .all().distinct(Cluster.id)
+        results = results.order_by(func.random()).limit(10).all()  # .all().distinct(Cluster.id)
         clusters = {c.id: {'name': str(c.records[0]), 'repr_record': c.records[0].full_repr(), 'size': len(c.relations), 'hits': cnt} for c, cnt in results}
         json_ret['clusters'] = clusters
     except Exception as e:
