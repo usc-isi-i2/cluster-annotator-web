@@ -89,7 +89,9 @@ $(document).ready(function(){
             return $(this).attr('data-cid');
         }).get();
         selected_clusters.push('{{ data['cluster_id'] }}');
-        var data = {'query': query_text, 'not_in': selected_clusters};
+        var original_clusters = JSON.parse($('#selected-table').attr('data-original'));
+        var data = {'query': query_text, 'cluster_id': '{{ data['cluster_id'] }}',
+                    'selected_clusters': selected_clusters, 'original_clusters': original_clusters};
 
         // search
         $.ajax({

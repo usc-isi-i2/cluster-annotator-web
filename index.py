@@ -275,6 +275,7 @@ def split(cluster_id):
     status_code = 200 if 'error' not in message else 400
     return render_template('split.html', data=data, message=message), status_code
 
+
 @index_bp.route('/annotation/merge/<cluster_id>', methods=['GET', 'POST'])
 @flask_login.login_required
 def merge(cluster_id):
@@ -287,15 +288,6 @@ def merge(cluster_id):
 
     if request.method == 'POST':
         new_cid_assignments = {}
-
-        # # find all previously merged clusters
-        # prev_set = set([])
-        # prev_new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
-        # if prev_new_cid:
-        #     results = db.session.query(Cluster, RecordClusterRelation) \
-        #         .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
-        #         .filter(RecordClusterRelation.new_cid == prev_new_cid).all()
-        #     prev_set = set([c.id for (c, rel) in results])
 
         # selected clusters
         curr_set = set([cid for cid, op in request.form.to_dict().items() if op == 'current'])
@@ -356,7 +348,8 @@ def merge_search():
     Cluster = app.config['cluster_class']
     RecordClusterRelation = app.config['record_cluster_relation_class']
 
-    json_input = request.get_json()  # {'query': str, 'not_in': list}
+    # {'query': str, 'original_clusters': list, 'selected_clusters': list, 'cluster_id': str}
+    json_input = request.get_json()
     json_ret = {}
 
     try:
@@ -367,10 +360,27 @@ def merge_search():
             .filter(Record.__ts_vec__.match(query_text))
         # .filter(Cluster.annotation == None) \  # comment out this line, because
 
-        not_in_list = json_input.get('not_in')
-        if not_in_list:
-            not_in_list = tuple(not_in_list)
-            results = results.filter(Cluster.id.notin_(not_in_list))
+        # filtering
+        cluster_id = json_input.get('cluster_id')
+        if cluster_id:
+            # find all previously added clusters
+            prev_new_cid = RecordClusterRelation.query.filter_by(cid=cluster_id).first().new_cid
+            if prev_new_cid:
+                results2 = db.session.query(Cluster, RecordClusterRelation) \
+                    .join(RecordClusterRelation, Cluster.id == RecordClusterRelation.cid) \
+                    .filter(RecordClusterRelation.new_cid == prev_new_cid).all()
+                prev_set = set([c.id for (c, rel) in results2])
+
+                # exclude currently added clusters
+                curr_set = set(json_input.get('selected_clusters'))
+                orig_set = set(json_input.get('original_clusters'))
+                if curr_set and orig_set:
+                    added_set = curr_set - orig_set
+                    removed_set = orig_set - curr_set
+                    prev_set |= added_set
+                    prev_set -= removed_set
+
+                results = results.filter(Cluster.id.notin_(tuple(prev_set)))
 
         results = results.group_by(Cluster.id)
         json_ret['total_count'] = results.count()
